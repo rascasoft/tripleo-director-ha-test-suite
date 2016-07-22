@@ -64,6 +64,8 @@ echo "--------------------------------------------------------"
 echo "$(date) Instance will be available at the IP $floatingip"
 echo "--------------------------------------------------------"
 
+set -e
+
 COUNTER=1
 while [ $COUNTER -lt $TIMEOUT ]
 do
@@ -74,9 +76,9 @@ do
    echo "SUCCESS"
    break
   else
-   echo "."
+   echo -n "."
  fi
  let COUNTER=COUNTER+1
 done
 
-[ $COUNTER -ge $TIMEOUT ] && echo "FAILURE!" || true
+[ $COUNTER -ge $TIMEOUT ] && (echo "FAILURE!"; exit 1)
