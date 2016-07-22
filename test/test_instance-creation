@@ -64,7 +64,7 @@ echo "--------------------------------------------------------"
 echo "$(date) Instance will be available at the IP $floatingip"
 echo "--------------------------------------------------------"
 
-set -e
+set +e
 
 COUNTER=1
 while [ $COUNTER -lt $TIMEOUT ]
