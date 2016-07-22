@@ -1,5 +1,7 @@
 # Test: Instance deployment
 
+set -e
+
 STACKDIR=/home/stack
 
 source $STACKDIR/overcloudrc
