@@ -75,7 +75,7 @@ function wait_resource_status {
 
  while [ $i -lt $RESOURCE_CHANGE_STATUS_TIMEOUT ]
   do
-   output=$(sudo pcs status resources | sed -n -e "/Clone Set: .*\[$resource\]/,/^ [a-Z]/p" | head -n -1 | tail -n +2 | egrep -v "$status\:")
+   output=$(sudo pcs status resources | sed -n -e "/\(Clone\|Master\/Slave\) Set: .*\[$resource\]/,/^ [a-Z]/p" | head -n -1 | tail -n +2 | egrep -v "$status\:")
    if [ "x$output" == "x" ]
     then
      return 0
@@ -94,7 +94,7 @@ function check_resource_status {
  resource=$1
  status=$2
 
- output=$(sudo pcs status resources | sed -n -e "/Clone Set: .*\[$resource\]/,/^ [a-Z]/p" | head -n -1 | tail -n +2 | egrep -v "$status\:")
+ output=$(sudo pcs status resources | sed -n -e "/\(Clone\|Master\/Slave\) Set: .*\[$resource\]/,/^ [a-Z]/p" | head -n -1 | tail -n +2 | egrep -v "$status\:")
  # Since we are checking a specific status, if we have output from above it means
  # that for some reason the resourse is not in the state we are expecting
  [ "x$output" == "x" ] && return 0 || (FAILURES=true; return 1)
@@ -130,6 +130,10 @@ function play_on_resources {
  "enable") resource_status="Started"
           ;;
  "disable") resource_status="Stopped"
+         ;;
+ "promote") resource_status="Masters"
+          ;;
+ "demote") resource_status="Slaves"
          ;;
  *) return 1
     ;;
