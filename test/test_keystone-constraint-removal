@@ -22,8 +22,16 @@ while [ $i -lt $MINUTES ]
   for resource in $OVERCLOUD_RESOURCES_NO_KEYSTONE
    do
     echo -n "$resource -> "
-    check_resource_status "$resource" "Started"
-    [ $? -eq 0 ] && echo "OK" || (FAILURES=1; echo "Error!")
+    # If the resource is a multi state like galera or redis, do a different check
+    case $resource in
+    "galera") check_resource_status "$resource" "Masters"
+              ;;
+    "redis") check_resource_status "$resource" "(Masters|Slaves)"
+             ;;
+    *) check_resource_status "$resource" "Started"
+       ;;
+    esac
+    [ $? -eq 0 ] && echo "OK" || (FAILURES=1; echo "Error!"; break)
    done
   let "i++"
  done
