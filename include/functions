@@ -128,13 +128,15 @@ function play_on_resources {
 
  case "$action" in
  "enable") resource_status="Started"
-          ;;
+           ;;
  "disable") resource_status="Stopped"
-         ;;
- "promote") resource_status="Masters"
-          ;;
- "demote") resource_status="Slaves"
-         ;;
+            ;;
+ "promote") action="enable"
+            resource_status="Masters"
+            ;;
+ "demote") action="disable"
+           resource_status="Slaves"
+           ;;
  *) return 1
     ;;
  esac
