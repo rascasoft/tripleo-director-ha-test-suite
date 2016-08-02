@@ -20,16 +20,14 @@ function check_failed_actions {
     then
      echo "Cluster has failed actions:"
      sudo pcs status | sed -n -e '/Failed Actions:/,/^$/p' | egrep 'OCF_|not running|unknown' | awk '{print $2}' | cut -f1 -d_ | sort |uniq
-     FAILURES=true
-     return 1
+     exit 1
     else
      errors=$(sudo pcs status | sed -n -e '/Failed Actions:/,/^$/p' | grep -A1 $resource)
      if [ $? -eq 0 ]
       then
        echo "Resource $resource has failed actions:"
        echo $errors
-       FAILURES=true
-       return 1
+       exit 1
       else
        echo "No failed actions for $resource."
        return 0
@@ -86,8 +84,8 @@ function wait_resource_status {
      let "i++"
    fi
   done
- FAILURES=true
- return 1
+ check_failed_actions
+ exit 1
 }
 
 function check_resource_status {
@@ -97,7 +95,7 @@ function check_resource_status {
  output=$(sudo pcs status resources | sed -n -e "/\(Clone\|Master\/Slave\) Set: .*\[$resource\]/,/^ [a-Z]/p" | head -n -1 | tail -n +2 | egrep -v "$status\:")
  # Since we are checking a specific status, if we have output from above it means
  # that for some reason the resourse is not in the state we are expecting
- [ "x$output" == "x" ] && return 0 || (FAILURES=true; return 1)
+ [ "x$output" == "x" ] && return 0 || (check_failed_actions; exit 1)
 }
 
 function wait_cluster_start {
@@ -118,8 +116,8 @@ function wait_cluster_start {
   let "i++"
  done
  echo "Problems during recovery!"
- FAILURES=true
- return 1
+ check_failed_actions
+ exit 1
 }
 
 function play_on_resources {
@@ -134,9 +132,8 @@ function play_on_resources {
    if [ $? -ne 0 ]
     then
      echo "FAILURE!"
-     FAILURES=true;
      check_failed_actions $resource
-     return 1
+     exit 1
     else
      echo "OK"
      return 0

@@ -65,21 +65,12 @@ if [ "$undercloud" != true ]
   echo "OK"
 fi
 
-# Define main variable that determines failures
-FAILURES=false
-
 if [ -f "$test_sequence" ]
  then
   echo "$(date) - Test: $(grep '^#.*Test:' $test_sequence | sed 's/^#.*Test: //')"
   . $test_sequence
  else
   echo "No test file passed or unable to read test file."
-fi
-
-if [ "$FAILURES" = true ]
- then
-  echo "Test $test_sequence FAILED!"
-  exit 1
 fi
 
 if [ -f "$recovery_sequence" ]
@@ -89,12 +80,6 @@ if [ -f "$recovery_sequence" ]
 
   echo "$(date) - Recovery: $(grep '^#.*Recovery:' $recovery_sequence | sed 's/^#.*Recovery: //')"
   . $recovery_sequence
-
-  if [ "$FAILURES" = true ]
-   then
-    echo "Recovery $recovery_sequence FAILED!"
-    exit 1
-  fi
  else
   echo "No recovery file passed or unable to read recovery file."
 fi
