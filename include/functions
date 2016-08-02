@@ -126,29 +126,20 @@ function play_on_resources {
  action=$1
  resources=$2
 
- case "$action" in
- "enable") resource_status="Started"
-           ;;
- "disable") resource_status="Stopped"
-            ;;
- "promote") action="enable"
-            resource_status="Masters"
-            ;;
- "demote") action="disable"
-           resource_status="Slaves"
-           ;;
- *) return 1
-    ;;
- esac
-
  for resource in $resources
   do
    echo -n "$(date) - Performing action $action on resource $resource "
    # Do the action on the resource
-   sudo pcs resource $action $resource
-   [ $? -ne 0 ] && (FAILURES=true; return 1)
-   # Wait action to complete
-   wait_resource_status $resource $resource_status
-   [ $? -ne 0 ] && check_failed_actions $resource || echo "OK"
+   sudo pcs resource $action $resource --wait $RESOURCE_CHANGE_STATUS_TIMEOUT
+   if [ $? -ne 0 ]
+    then
+     echo "FAILURE!"
+     FAILURES=true;
+     check_failed_actions $resource
+     return 1
+    else
+     echo "OK"
+     return 0
+   fi
   done
 }
