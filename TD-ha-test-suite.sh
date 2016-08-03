@@ -11,7 +11,7 @@ WORKDIR=$(dirname $0)
 
 # Fixed parameters
 # How much time wait in seconds for a resource to change status (i.e. from started to stopped)
-RESOURCE_CHANGE_STATUS_TIMEOUT=300
+RESOURCE_CHANGE_STATUS_TIMEOUT=600
 # How much time wait in seconds before starting recovery
 DEFAULT_RECOVERY_WAIT_TIME=10
 
