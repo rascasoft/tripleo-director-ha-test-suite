@@ -35,7 +35,7 @@ nova flavor-create --ephemeral 0  --is-public True test.small overcloud-instance
 private_net_id=$(neutron net-list | grep private-network | awk '{print $2}')
 wget -O /tmp/cirros-0.3.4-x86_64-disk.img http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 glance image-create --name CirrOS --container-format bare --disk-format raw --file /tmp/cirros-0.3.4-x86_64-disk.img
-nova boot --image CirrOS --flavor m1.small --security-groups pingandssh --nic net-id=$private_net_id $INSTANCE_NAME                                                                 
+nova boot --image CirrOS --flavor test.small --security-groups pingandssh --nic net-id=$private_net_id $INSTANCE_NAME                                                                 
 
 #[stack@mrg-06 ~]$ nova list
 #...
