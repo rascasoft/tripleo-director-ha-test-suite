@@ -59,7 +59,7 @@ fi
 if [ "$undercloud" != true ]
  then
   echo -n "$(date) - Populationg overcloud elements..."
-  OVERCLOUD_CORE_RESOURCES="galera rabbitmq-clone"
+  OVERCLOUD_CORE_RESOURCES="galera rabbitmq redis"
   OVERCLOUD_RESOURCES=$(sudo pcs resource show | egrep '^ (C|[a-Z])' | sed 's/.* \[\(.*\)\]/\1/g' | sed 's/ \(.*\)(.*):.*/\1/g' | sort)
   OVERCLOUD_SYSTEMD_RESOURCES=$(sudo pcs config show | egrep "Resource:.*systemd"|grep -v "haproxy"|awk '{print $2}')
   echo "OK"
