@@ -136,7 +136,7 @@ function play_on_resources {
      exit 1
     else
      echo "OK"
-     return 0
    fi
   done
+  return 0
 }
