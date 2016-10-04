@@ -13,7 +13,7 @@ do
   then
    echo "Still waiting for all resources to start..."
   else
-   echo "OK. No stopped resources."
+   echo "No stopped resources."
    exit 0
  fi
  let "i++"
