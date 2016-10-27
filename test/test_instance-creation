@@ -13,11 +13,38 @@ TIMEOUT=30
 INSTANCE_NAME=cirros-1
 PRIVATE_NETWORK=10.1.1.0/24
 
+# Gateway creation
+# When the environment is recovering from a previous test it can happen
+# that neutron is waiting to rejoin its cluster, preventing from creating
+# new stuff like router. We wait at least 300 seconds before giving up.
+set +e
+RUN=1
+while [ $RUN -lt $TIMEOUT ]
+ do
+  neutron router-create floating-router
+  if [ $? -eq 0 ]
+   then
+    break
+   else
+    echo "Waiting..."
+    let "RUN++"
+    sleep 10
+  fi
+done
+# If timeout was reached then we need to exit with error
+if [ $RUN -ge $TIMEOUT ]
+ then
+  echo "It was not possible to create the router, giving up."
+  exit 1
+fi
+set -e
+
+# Network and subnet creation
 neutron net-create floating-network --router:external=True --provider:physical_network $FLOATING_PHYSICAL_NET --provider:network_type flat
 neutron subnet-create --name floating-subnet --disable-dhcp --allocation-pool start=$FLOATING_RANGE_START,end=$FLOATING_RANGE_END --gateway $FLOATING_GW floating-network $FLOATING_SUBNET
 neutron net-create private-network
 neutron subnet-create private-network $PRIVATE_NETWORK --name private-subnet
-neutron router-create floating-router
+# Router configuration
 neutron router-interface-add floating-router private-subnet
 neutron router-gateway-set floating-router floating-network
 neutron security-group-create pingandssh
