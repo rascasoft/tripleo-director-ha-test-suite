@@ -1,6 +1,7 @@
 # Raoul Scarazzini (rasca@redhat.com)
-# This script provides a testing suite from TripleO/Directory OpenStack HA (so with Pacemaker) environments
-# Functions to be used inside TripleO/Directory OpenStack HA environments
+# This script provides a testing suite from TripleO/Directory OpenStack HA (so
+# with Pacemaker) environments functions to be used inside TripleO/Director
+# OpenStack HA environments
 
 function usage {
   echo "Usage $0 -t <testfile> [-r <recover file>] [-u]
@@ -60,9 +61,9 @@ function check_resources_process_status {
    *) systemctl is-active $resource &> /dev/null
       ;;
    esac
- 
+
    [ $? -eq 0 ] && echo "active" || echo "inactive"
- 
+
   done
 }
 
@@ -93,8 +94,8 @@ function check_resource_status {
  status=$2
 
  output=$(sudo pcs status resources | sed -n -e "/\(Clone\|Master\/Slave\) Set: .*\[$resource\]/,/^ [a-Z]/p" | head -n -1 | tail -n +2 | egrep -v "$status\:")
- # Since we are checking a specific status, if we have output from above it means
- # that for some reason the resourse is not in the state we are expecting
+ # Since we are checking a specific status, if we have output from above it
+ # means that for some reason the resource is not in the state we are expecting
  [ "x$output" == "x" ] && return 0 || (check_failed_actions; exit 1)
 }
 
@@ -103,7 +104,12 @@ function wait_cluster_start {
  while true; do
   [ $i -eq $RESOURCE_CHANGE_STATUS_TIMEOUT ] && break
 
-  sudo pcs status | egrep "Stopped|Failed" &> /dev/null
+  # Check for failed actions
+  sudo pcs status | egrep "Failed" &> /dev/null
+  [ $? -eq 0 ] && break
+
+  # If we have stopped resources let's wait
+  sudo pcs status | egrep "Stopped" &> /dev/null
   if [ $? -eq 0 ]
    then
     echo -n "."
@@ -115,7 +121,10 @@ function wait_cluster_start {
   sleep 1
   let "i++"
  done
- echo "Problems during recovery!"
+
+ # If we are here than we have problems: we hit timeout or we still have
+ # stopped resources
+ echo "Problems found. There are stopped or failed resources!"
  check_failed_actions
  exit 1
 }
